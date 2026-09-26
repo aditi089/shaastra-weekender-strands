@@ -16,7 +16,7 @@
     --text:#F5F3EE;
     --muted:#8D8D9A;
     --whatsapp:#25D366;
-    --accent:#F2C94C; /* overridden per stall */
+    --accent:#F2C94C;
     --accent-soft: rgba(242,201,76,0.14);
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
@@ -86,7 +86,10 @@
   .hero .eyebrow{font-family:'Space Mono',monospace; color:var(--accent); font-size:12px; letter-spacing:0.16em; text-transform:uppercase;}
   .hero h1{font-size:46px; line-height:0.95; margin-top:6px;}
   .hero p{color:var(--muted); font-size:15px; line-height:1.5; margin-top:10px; max-width:40ch;}
-  .stall-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:20px;}
+
+  /* 1x3 column layout instead of 2x2 grid */
+  .stall-grid{display:grid; grid-template-columns:1fr; gap:12px; margin-top:20px;}
+
   .stall-card{
     display:block; text-decoration:none; color:inherit; cursor:pointer;
     background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:14px;
@@ -234,9 +237,13 @@
 <script>
 const WA_LINK = "https://chat.whatsapp.com/JCcW4lxKSovExIKRbn7eYW";
 
+/* Three games: Spotlight Strands, Summit Strands, Eons Strands.
+   Each unlocks only once its ?stall=... URL is visited (i.e. its QR scanned).
+   Verified letter grids/word paths kept as-is from the original boards —
+   only the game names/keys changed. */
 const STALLS = {
-  topleft: {
-    id:"topleft", game:"Game Show", location:"Himalaya", accent:"#F2C94C", short:"GS",
+  spotlight: {
+    id:"spotlight", game:"Spotlight Strands", accent:"#F2C94C", short:"SP",
     letters:[
       ["A","M","E","O","C","E"],
       ["L","O","C","H","O","A"],
@@ -256,8 +263,8 @@ const STALLS = {
       {text:"MEMORY",  color:"#8B5CF6", path:[[6,2],[6,1],[5,1],[4,1],[3,1],[3,2]]}
     ]
   },
-  topright: {
-    id:"topright", game:"Be An Influencer", location:"Himalaya", accent:"#A855F7", short:"BI",
+  summit: {
+    id:"summit", game:"Summit Strands", accent:"#A855F7", short:"SU",
     letters:[
       ["S","W","E","I","D","O"],
       ["M","M","O","G","I","I"],
@@ -277,8 +284,8 @@ const STALLS = {
       {text:"ISRAEL",  color:"#22C55E", path:[[1,5],[2,5],[3,5],[4,5],[5,5],[6,5]]}
     ]
   },
-  bottomleft: {
-    id:"bottomleft", game:"ScreamMeter", location:"Himalaya", accent:"#FF5A4E", short:"SM",
+  eons: {
+    id:"eons", game:"Eons Strands", accent:"#FF5A4E", short:"EO",
     letters:[
       ["C","A","N","C","E","R"],
       ["I","H","A","I","R","J"],
@@ -298,33 +305,11 @@ const STALLS = {
       {text:"PHARMA",  color:"#22D3EE", path:[[3,1],[4,1],[5,1],[6,1],[6,2],[5,2]]},
       {text:"TIME",    color:"#15803D", path:[[5,3],[6,3],[6,4],[6,5]]}
     ]
-  },
-  bottomright: {
-    id:"bottomright", game:"Vindhya Challenge", location:"Vindhya", accent:"#22D3B2", short:"VC",
-    letters:[
-      ["C","L","I","M","A","T"],
-      ["A","L","L","O","Y","E"],
-      ["I","M","I","T","S","E"],
-      ["N","I","S","P","O","C"],
-      ["G","N","S","T","R","H"],
-      ["F","T","A","K","E","O"],
-      ["L","O","O","D","S","E"]
-    ],
-    words:[
-      {text:"CLIMATE", color:"#FFCE00", path:[[0,0],[0,1],[0,2],[0,3],[0,4],[0,5],[1,5]]},
-      {text:"ALLOYS",  color:"#FF8A00", path:[[1,0],[1,1],[1,2],[1,3],[1,4],[2,4]]},
-      {text:"TIMING",  color:"#22D3EE", path:[[2,3],[2,2],[2,1],[2,0],[3,0],[4,0]]},
-      {text:"INTAKE",  color:"#F72585", path:[[3,1],[4,1],[5,1],[5,2],[5,3],[5,4]]},
-      {text:"SPORTS",  color:"#8B5CF6", path:[[3,2],[3,3],[3,4],[4,4],[4,3],[4,2]]},
-      {text:"FLOOD",   color:"#22C55E", path:[[5,0],[6,0],[6,1],[6,2],[6,3]]},
-      {text:"ECHOES",  color:"#FF3B30", path:[[2,5],[3,5],[4,5],[5,5],[6,5],[6,4]]}
-    ]
   }
 };
-const HIMALAYA_KEYS = ["topleft","topright","bottomleft"];
-const VINDHYA_KEYS = ["bottomright"];
+const ALL_KEYS = ["spotlight","summit","eons"];
 
-const STORE_KEY = "strands_arena_v2";
+const STORE_KEY = "strands_arena_v3"; // bumped: new game keys mean old saved progress no longer maps cleanly
 function loadState(){
   try{
     const raw = localStorage.getItem(STORE_KEY);
@@ -344,18 +329,15 @@ function loadState(){
       }
     }
   }catch(e){}
-  return { status:{}, foundWords:{}, scanned:{}, himalayaCelebrated:false, betaMode:false, hintsGiven:{} };
+  return { status:{}, foundWords:{}, scanned:{}, allCelebrated:false, betaMode:false, hintsGiven:{} };
 }
 function saveState(){ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
 let state = loadState();
 
-/* Beta mode: visit with ?beta=1 once to unlock every board on this device.
-   The flag then persists in localStorage until toggled off. */
 if(new URLSearchParams(location.search).get("beta") === "1"){
   state.betaMode = true;
   saveState();
 }
-
 function toggleBeta(){
   state.betaMode = !state.betaMode;
   saveState();
@@ -417,7 +399,7 @@ function renderLanding(){
     const unlocked = state.betaMode || !!state.scanned[s.id];
     const badge = st==="solved" ? "✅" : st==="gaveup" ? "🏳️" : "";
     const statusLine = !unlocked
-      ? `🔒 Scan the QR at ${s.location} to unlock`
+      ? `🔒 Scan the QR to unlock`
       : (st==="solved" ? "Solved — tap to review"
          : st==="gaveup" ? "Revealed — tap to review"
          : `${s.words.length} words · tap to play`);
@@ -425,7 +407,6 @@ function renderLanding(){
     const cls = unlocked ? "stall-card" : "stall-card locked";
     return `<a class="${cls}" ${tag} style="--c:${s.accent}">
       <div class="badge">${badge}</div>
-      <div class="n">${s.location.toUpperCase()}</div>
       <div class="g">${s.game}</div>
       <div class="l">${statusLine}</div>
     </a>`;
@@ -442,8 +423,6 @@ function renderLanding(){
     <div class="stall-grid">${cards}</div>
     <div class="footer-note">
       <button class="reset-link" onclick="resetAll()">Reset all progress</button>
-      <span class="sep">·</span>
-      <button class="reset-link" onclick="toggleBeta()">${state.betaMode ? "Turn off beta mode" : "Turn on beta mode"}</button>
     </div>
   `;
   setWaBar(true, "Join the community", "Tap for updates, drops & more games");
@@ -456,23 +435,19 @@ function renderLanding(){
   });
 }
 
+/* Single "Status" bar covering all three games — Vindhya bar removed,
+   Himalaya bar relabeled and repurposed to track everything. */
 function renderProgressStrip(){
-  const dots = HIMALAYA_KEYS.map(k=>{
+  const dots = ALL_KEYS.map(k=>{
     ensurePuzzleState(k);
     const st = state.status[k];
     const cls = st==="solved" ? "solved" : st==="gaveup" ? "gaveup" : "";
     return `<div class="dot ${cls}"></div>`;
   }).join("");
-  ensurePuzzleState("bottomright");
-  const vSt = state.status["bottomright"];
   return `
     <div class="progress-strip">
-      <div class="label">Himalaya</div>
+      <div class="label">Status</div>
       <div class="dots">${dots}</div>
-    </div>
-    <div class="progress-strip">
-      <div class="label">Vindhya</div>
-      <div class="dots"><div class="dot ${vSt==='solved'?'solved':vSt==='gaveup'?'gaveup':''}" style="flex:1"></div></div>
     </div>
   `;
 }
@@ -517,358 +492,4 @@ function renderPuzzlePage(key){
       <div class="brand">
         <div class="mark">${puzzle.short}</div>
         <div class="txt">
-          <div class="eyebrow">${puzzle.location}</div>
-          <div class="title">${puzzle.game}</div>
-        </div>
-      </div>
-    </div>
-    <button class="btn btn-back" id="homeBtnBig">← All stalls &amp; progress</button>
-    ${state.betaMode ? `<div class="beta-banner">🧪 <span><b>Beta tester mode</b> is on — jump between any board from "All stalls".</span></div>` : ""}
-    ${renderProgressStrip()}
-    <div class="card">
-      <div class="puzzle-head">
-        <h2>Untangle the board</h2>
-        <div class="found-count"><b id="foundNum">0</b>/${puzzle.words.length}</div>
-      </div>
-      <div class="hint-line">Drag across letters — up, down, sideways or diagonal — to trace a word.</div>
-      <div class="grid-shell" id="gridShell">
-        <svg class="threads" id="threads"></svg>
-        <div class="grid" id="grid" style="grid-template-columns:repeat(${puzzle.letters[0].length},1fr);"></div>
-      </div>
-      <div class="chips" id="chips"></div>
-      <div class="actions">
-        <button class="btn btn-ghost" id="giveUpBtn">Give up</button>
-        <button class="btn btn-ghost" id="hintBtn">Hint</button>
-        <button class="btn btn-primary" id="clearBtn">Clear</button>
-      </div>
-    </div>
-    <div class="footer-note">Progress saves automatically on this device. <button class="reset-link" onclick="resetAll()">Reset progress</button></div>
-  `;
-
-  buildGrid(puzzle);
-  buildChips(puzzle);
-  updateFoundCount(puzzle);
-
-  document.getElementById("clearBtn").addEventListener("click", ()=>{
-    currentPath = [];
-    renderSelectionVisual(puzzle);
-  });
-  document.getElementById("giveUpBtn").addEventListener("click", ()=> confirmGiveUp(puzzle));
-  document.getElementById("hintBtn").addEventListener("click", ()=> giveHint(puzzle));
-  document.getElementById("homeBtnBig").addEventListener("click", (e)=>{
-    e.preventDefault();
-    navigate(null);
-  });
-
-  setWaBar(true, "Join the community", "Scanned in — tap anytime for the group");
-
-  if(already === "solved"){
-    revealAll(puzzle, true);
-    updateFoundCount(puzzle);
-  }else if(already === "gaveup"){
-    revealAll(puzzle, false);
-    updateFoundCount(puzzle);
-  }
-}
-
-function buildGrid(puzzle){
-  const grid = document.getElementById("grid");
-  grid.innerHTML = "";
-  puzzle.letters.forEach((row, r)=>{
-    row.forEach((letter, c)=>{
-      const cell = document.createElement("div");
-      cell.className = "cell";
-      cell.textContent = letter;
-      cell.dataset.r = r;
-      cell.dataset.c = c;
-      grid.appendChild(cell);
-    });
-  });
-
-  const shell = document.getElementById("gridShell");
-  const getCell = (r,c)=> grid.children[r*puzzle.letters[0].length + c];
-
-  function cellFromPoint(x,y){
-    const el = document.elementFromPoint(x,y);
-    if(!el || !el.classList || !el.classList.contains("cell")) return null;
-    return [parseInt(el.dataset.r), parseInt(el.dataset.c)];
-  }
-  function isAdjacent(a,b){
-    return Math.abs(a[0]-b[0])<=1 && Math.abs(a[1]-b[1])<=1 && !(a[0]===b[0] && a[1]===b[1]);
-  }
-  function sameCell(a,b){ return a[0]===b[0] && a[1]===b[1]; }
-  function inPath(pt){ return currentPath.some(p=>sameCell(p,pt)); }
-
-  function tryAdd(pt){
-    if(!pt) return;
-    const el = getCell(pt[0], pt[1]);
-    if(el.classList.contains("found")){
-      showToast(`That letter's already used in <b>${el.dataset.word}</b> — the word's right, try a different tile for it.`);
-      return;
-    }
-    if(currentPath.length===0){ currentPath.push(pt); renderSelectionVisual(puzzle); return; }
-    const last = currentPath[currentPath.length-1];
-    if(sameCell(pt,last)) return;
-    if(currentPath.length>1 && sameCell(pt, currentPath[currentPath.length-2])){
-      currentPath.pop(); renderSelectionVisual(puzzle); return;
-    }
-    if(inPath(pt)) return;
-    if(!isAdjacent(last, pt)) return;
-    currentPath.push(pt);
-    renderSelectionVisual(puzzle);
-  }
-
-  function start(x,y){
-    if(state.status[puzzle.id]==="solved" || state.status[puzzle.id]==="gaveup") return;
-    dragging = true;
-    currentPath = [];
-    tryAdd(cellFromPoint(x,y));
-  }
-  function move(x,y){
-    if(!dragging) return;
-    tryAdd(cellFromPoint(x,y));
-  }
-  function end(){
-    if(!dragging) return;
-    dragging = false;
-    attemptSubmit(puzzle);
-  }
-
-  shell.addEventListener("pointerdown", (e)=>{ start(e.clientX, e.clientY); });
-  shell.addEventListener("pointermove", (e)=>{ if(dragging) move(e.clientX, e.clientY); });
-  shell.addEventListener("touchstart", (e)=>{ const t=e.touches[0]; start(t.clientX,t.clientY); }, {passive:true});
-  shell.addEventListener("touchmove", (e)=>{ const t=e.touches[0]; move(t.clientX,t.clientY); }, {passive:true});
-  shell.addEventListener("touchend", end);
-
-  renderThreads(puzzle);
-}
-
-function cellCenter(puzzle, r, c){
-  const grid = document.getElementById("grid");
-  const cell = grid.children[r*puzzle.letters[0].length + c];
-  const shellBox = document.getElementById("gridShell").getBoundingClientRect();
-  const box = cell.getBoundingClientRect();
-  return [
-    box.left + box.width/2 - shellBox.left,
-    box.top + box.height/2 - shellBox.top
-  ];
-}
-
-function pathToD(puzzle, path){
-  if(path.length===0) return "";
-  const pts = path.map(([r,c])=>cellCenter(puzzle,r,c));
-  return "M" + pts.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" L ");
-}
-
-function renderThreads(puzzle){
-  const svg = document.getElementById("threads");
-  const shellBox = document.getElementById("gridShell").getBoundingClientRect();
-  svg.setAttribute("width", shellBox.width);
-  svg.setAttribute("height", shellBox.height);
-  let html = "";
-  Object.entries(foundPaths).forEach(([word, path])=>{
-    const wordDef = puzzle.words.find(w=>w.text===word);
-    html += `<path d="${pathToD(puzzle,path)}" stroke="${wordDef.color}" stroke-width="14" opacity="0.55"/>`;
-  });
-  if(currentPath.length>1){
-    html += `<path d="${pathToD(puzzle,currentPath)}" stroke="${puzzle.accent}" stroke-width="12" opacity="0.85"/>`;
-  }
-  svg.innerHTML = html;
-}
-
-function renderSelectionVisual(puzzle){
-  document.querySelectorAll(".cell").forEach(cell=>{
-    if(!cell.classList.contains("found")) cell.classList.remove("active");
-  });
-  currentPath.forEach(([r,c])=>{
-    const cell = document.getElementById("grid").children[r*puzzle.letters[0].length + c];
-    if(!cell.classList.contains("found")) cell.classList.add("active");
-  });
-  renderThreads(puzzle);
-}
-
-function pathsEqual(a,b){
-  if(a.length !== b.length) return false;
-  return a.every(([r,c],i)=> b[i][0]===r && b[i][1]===c);
-}
-
-function attemptSubmit(puzzle){
-  const word = currentPath.map(([r,c])=>puzzle.letters[r][c]).join("");
-  const textMatch = puzzle.words.find(w=>w.text === word);
-
-  if(textMatch && !state.foundWords[puzzle.id].includes(textMatch.text) && pathsEqual(currentPath, textMatch.path)){
-    const match = textMatch;
-    foundPaths[match.text] = currentPath.slice();
-    state.foundWords[puzzle.id].push(match.text);
-    saveState();
-    currentPath.forEach(([r,c])=>{
-      const cell = document.getElementById("grid").children[r*puzzle.letters[0].length + c];
-      cell.classList.add("found","just-found");
-      cell.dataset.word = match.text;
-      cell.style.background = match.color;
-      cell.style.borderColor = match.color;
-      cell.style.color = "#0B0B10";
-      setTimeout(()=>cell.classList.remove("just-found"), 400);
-    });
-    currentPath = [];
-    buildChips(puzzle);
-    updateFoundCount(puzzle);
-    renderThreads(puzzle);
-    checkCompletion(puzzle);
-    return;
-  }
-
-  if(textMatch && state.foundWords[puzzle.id].includes(textMatch.text)){
-    showToast(`You've already found <b>${word}</b> ✅`);
-  }else if(textMatch){
-    showToast(`That spells <b>${word}</b>, but from the wrong tiles — one of those letters belongs to a different word. Try tracing it again.`);
-  }
-  const shell = document.getElementById("gridShell");
-  shell.classList.add("shake");
-  setTimeout(()=>shell.classList.remove("shake"), 300);
-  currentPath = [];
-  renderSelectionVisual(puzzle);
-}
-
-function showToast(html){
-  openModal(`
-    <div class="icon">✋</div>
-    <p style="margin-top:0">${html}</p>
-    <button class="btn btn-primary" style="width:100%" onclick="closeModal()">Got it</button>
-  `);
-}
-
-function giveHint(puzzle){
-  if(!state.hintsGiven) state.hintsGiven = {};
-  if(!state.hintsGiven[puzzle.id]) state.hintsGiven[puzzle.id] = [];
-
-  const unfound = puzzle.words.filter(w=>!state.foundWords[puzzle.id].includes(w.text));
-  if(unfound.length === 0){
-    openModal(`
-      <div class="icon">🎉</div>
-      <h3>Nothing left to hint!</h3>
-      <p>You've already found every word on this board.</p>
-      <button class="btn btn-primary" style="width:100%" onclick="closeModal()">Nice</button>
-    `);
-    return;
-  }
-
-  const notYetHinted = unfound.filter(w=>!state.hintsGiven[puzzle.id].includes(w.text));
-  const pick = (notYetHinted.length ? notYetHinted : unfound)[
-    Math.floor(Math.random() * (notYetHinted.length ? notYetHinted.length : unfound.length))
-  ];
-
-  if(!state.hintsGiven[puzzle.id].includes(pick.text)){
-    state.hintsGiven[puzzle.id].push(pick.text);
-    saveState();
-  }
-
-  openModal(`
-    <div class="icon">💡</div>
-    <h3>${pick.text}</h3>
-    <p>One of the words still hiding on this board — but not where it is. Go find its tiles!</p>
-    <button class="btn btn-primary" style="width:100%" onclick="closeModal()">Back to the board</button>
-  `);
-}
-
-function buildChips(puzzle){
-  const chips = document.getElementById("chips");
-  chips.innerHTML = puzzle.words.map(w=>{
-    const found = state.foundWords[puzzle.id].includes(w.text);
-    return `<div class="chip ${found?'found':''}" style="${found?`background:${w.color}`:''}">${found ? w.text : "•".repeat(w.text.length)}</div>`;
-  }).join("");
-}
-
-function updateFoundCount(puzzle){
-  const el = document.getElementById("foundNum");
-  if(el) el.textContent = state.foundWords[puzzle.id].length;
-}
-
-function revealAll(puzzle, wasSolved){
-  puzzle.words.forEach(w=>{
-    if(!state.foundWords[puzzle.id].includes(w.text)){
-      if(wasSolved) state.foundWords[puzzle.id].push(w.text);
-    }
-    foundPaths[w.text] = w.path;
-    w.path.forEach(([r,c])=>{
-      const cell = document.getElementById("grid").children[r*puzzle.letters[0].length + c];
-      cell.classList.add("found");
-      cell.dataset.word = w.text;
-      cell.style.background = w.color;
-      cell.style.borderColor = w.color;
-      cell.style.color = "#0B0B10";
-    });
-  });
-  buildChips(puzzle);
-  renderThreads(puzzle);
-}
-
-function checkCompletion(puzzle){
-  if(state.foundWords[puzzle.id].length === puzzle.words.length){
-    state.status[puzzle.id] = "solved";
-    saveState();
-    showSolvedModal(puzzle);
-  }
-}
-
-function showSolvedModal(puzzle){
-  const himalayaAllDone = HIMALAYA_KEYS.every(k=> state.status[k]==="solved" || state.status[k]==="gaveup");
-  openModal(`
-    <div class="icon">🎉</div>
-    <h3>Board cleared!</h3>
-    <p>You untangled every word at ${puzzle.game}. Your bonus reward is unlocked — hop into the community to claim it.</p>
-    <a class="btn btn-primary" href="${WA_LINK}" target="_blank" rel="noopener" style="display:block; margin-bottom:10px;">Open WhatsApp community</a>
-    <button class="btn btn-ghost" style="width:100%" onclick="closeModal()">Keep exploring</button>
-  `);
-  setWaBar(true, "Reward unlocked 🎉", "Tap to claim it in the community");
-
-  if(himalayaAllDone && !state.himalayaCelebrated){
-    state.himalayaCelebrated = true;
-    saveState();
-    setTimeout(()=>{
-      openModal(`
-        <div class="icon">🏔️</div>
-        <h3>Himalaya, complete.</h3>
-        <p>All three Himalaya boards are done. That's the full set — one more reason to say hi in the community.</p>
-        <a class="btn btn-primary" href="${WA_LINK}" target="_blank" rel="noopener" style="display:block;">Open WhatsApp community</a>
-      `);
-    }, 900);
-  }
-}
-
-function confirmGiveUp(puzzle){
-  if(state.status[puzzle.id]==="solved" || state.status[puzzle.id]==="gaveup") return;
-  openModal(`
-    <div class="icon">🏳️</div>
-    <h3>Give up on this board?</h3>
-    <p>We'll reveal every word. You'll still get a community invite — no hard feelings.</p>
-    <button class="btn btn-primary" style="width:100%; margin-bottom:10px;" id="confirmGiveUp">Yes, reveal it</button>
-    <button class="btn btn-ghost" style="width:100%" onclick="closeModal()">Keep trying</button>
-  `);
-  document.getElementById("confirmGiveUp").addEventListener("click", ()=>{
-    state.status[puzzle.id] = "gaveup";
-    saveState();
-    closeModal();
-    revealAll(puzzle, false);
-    updateFoundCount(puzzle);
-    openModal(`
-      <div class="icon">👀</div>
-      <h3>Here's the board</h3>
-      <p>No worries — every word's revealed above. Come say hi in the community anyway.</p>
-      <a class="btn btn-primary" href="${WA_LINK}" target="_blank" rel="noopener" style="display:block;">Open WhatsApp community</a>
-    `);
-    setWaBar(true, "Join the community", "Tap for updates, drops & more games");
-  });
-}
-
-window.closeModal = closeModal;
-
-window.addEventListener("resize", ()=>{
-  const key = currentStall();
-  if(key && STALLS[key]) renderThreads(STALLS[key]);
-});
-
-route();
-</script>
-</body>
-</html>
+          <div
