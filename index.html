@@ -16,7 +16,7 @@
     --text:#F5F3EE;
     --muted:#8D8D9A;
     --whatsapp:#25D366;
-    --accent:#F2C94C;
+    --accent:#F2C94C; /* overridden per stall */
     --accent-soft: rgba(242,201,76,0.14);
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
@@ -28,7 +28,7 @@
     color:var(--text);
     font-family:'Inter',sans-serif;
     min-height:100vh;
-    padding-bottom: 84px;
+    padding-bottom: 84px; /* room for sticky whatsapp bar */
   }
   ::selection{background:var(--accent); color:#000;}
 
@@ -36,6 +36,7 @@
 
   .wrap{max-width:520px; margin:0 auto; padding:18px 16px 0;}
 
+  /* ---------- Top bar ---------- */
   .topbar{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:6px 2px 14px;}
   .brand{display:flex; align-items:center; gap:10px;}
   .brand .mark{
@@ -63,6 +64,7 @@
   }
   .btn-back:active{transform:scale(0.98);}
 
+  /* ---------- Progress strip ---------- */
   .progress-strip{
     display:flex; align-items:center; gap:8px; margin-bottom:16px;
     background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:10px 12px;
@@ -77,28 +79,29 @@
   .dot.gaveup{background:#5b5b66;}
   .dot.current{outline:2px solid var(--accent); outline-offset:1px;}
 
+  /* ---------- Card ---------- */
   .card{
     background:var(--surface); border:1px solid var(--line); border-radius:20px;
     padding:16px; margin-bottom:16px;
   }
 
+  /* ---------- Landing (stall picker) ---------- */
   .hero{padding:28px 4px 8px;}
   .hero .eyebrow{font-family:'Space Mono',monospace; color:var(--accent); font-size:12px; letter-spacing:0.16em; text-transform:uppercase;}
   .hero h1{font-size:46px; line-height:0.95; margin-top:6px;}
   .hero p{color:var(--muted); font-size:15px; line-height:1.5; margin-top:10px; max-width:40ch;}
-
   .stall-grid{display:grid; grid-template-columns:1fr; gap:12px; margin-top:20px;}
-
   .stall-card{
-    display:block; text-decoration:none; color:inherit; cursor:pointer;
-    background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:14px;
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    text-decoration:none; color:inherit; cursor:pointer;
+    background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:18px;
     position:relative; overflow:hidden;
   }
   .stall-card::before{
     content:""; position:absolute; inset:0; opacity:0.10; background:var(--c);
   }
-  .stall-card .n{font-family:'Space Mono',monospace; font-size:11px; color:var(--muted);}
-  .stall-card .g{font-family:'Bebas Neue'; font-size:22px; margin-top:2px; position:relative;}
+  .stall-card .n{font-family:'Space Mono',monospace; font-size:11px; color:var(--muted); position:relative;}
+  .stall-card .g{font-family:'Bebas Neue'; font-size:26px; margin-top:2px; position:relative;}
   .stall-card .l{font-size:12px; color:var(--muted); margin-top:4px; position:relative;}
   .stall-card .badge{
     position:absolute; top:10px; right:10px; font-size:16px;
@@ -108,6 +111,7 @@
   .stall-card.locked .g{color:var(--muted);}
   .stall-card.locked .l{display:flex; align-items:center; gap:4px;}
 
+  /* ---------- toast ---------- */
   .toast-host{
     position:absolute; left:50%; top:-6px; transform:translate(-50%,-100%);
     z-index:5; width:calc(100% - 8px); pointer-events:none;
@@ -121,12 +125,14 @@
   .toast.show{opacity:1; transform:translateY(0);}
   .toast b{color:var(--accent);}
 
+  /* ---------- Puzzle header ---------- */
   .puzzle-head{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:2px;}
   .puzzle-head h2{font-size:28px;}
   .found-count{font-family:'Space Mono',monospace; font-size:13px; color:var(--muted);}
   .found-count b{color:var(--accent);}
   .hint-line{color:var(--muted); font-size:13px; margin:4px 0 14px;}
 
+  /* ---------- Grid ---------- */
   .grid-shell{position:relative; touch-action:none; user-select:none;}
   .grid{
     display:grid; gap:6px;
@@ -150,6 +156,7 @@
   svg.threads{position:absolute; inset:0; z-index:1; pointer-events:none; overflow:visible;}
   svg.threads path{fill:none; stroke-linecap:round; stroke-linejoin:round;}
 
+  /* ---------- word chips ---------- */
   .chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:16px;}
   .chip{
     font-family:'Space Mono',monospace; font-size:12px; padding:6px 10px; border-radius:100px;
@@ -158,6 +165,7 @@
   }
   .chip.found{color:#0B0B10; border-color:transparent; font-weight:700;}
 
+  /* ---------- action row ---------- */
   .actions{display:flex; gap:10px; margin-top:18px;}
   .btn{
     flex:1; border:none; border-radius:12px; padding:13px 14px; font-family:'Inter';
@@ -168,6 +176,7 @@
   .btn-ghost:active{background:var(--surface-2);}
   .btn-primary{background:var(--accent); color:#0B0B10;}
 
+  /* ---------- sticky whatsapp bar ---------- */
   .wa-bar{
     position:fixed; left:0; right:0; bottom:0; z-index:50;
     background:linear-gradient(180deg, rgba(11,11,16,0), var(--ink) 22%);
@@ -187,6 +196,7 @@
   .wa-inner .t .b{font-size:11.5px; opacity:0.85;}
   .wa-inner .go{margin-left:auto; font-size:20px;}
 
+  /* ---------- modal ---------- */
   .overlay{
     position:fixed; inset:0; background:rgba(6,6,9,0.72); backdrop-filter: blur(4px);
     display:flex; align-items:flex-end; justify-content:center; z-index:100;
@@ -234,11 +244,14 @@
 </div>
 
 <script>
+/* =========================================================
+   DATA — 4 verified Strands boards (7 rows x 6 cols each)
+   ========================================================= */
 const WA_LINK = "https://chat.whatsapp.com/JCcW4lxKSovExIKRbn7eYW";
 
 const STALLS = {
-  spotlight: {
-    id:"spotlight", game:"Spotlight Strands", accent:"#F2C94C", short:"SP",
+  topleft: {
+    id:"topleft", game:"Game Show", location:"Himalaya", accent:"#F2C94C", short:"GS",
     letters:[
       ["A","M","E","O","C","E"],
       ["L","O","C","H","O","A"],
@@ -258,8 +271,8 @@ const STALLS = {
       {text:"MEMORY",  color:"#8B5CF6", path:[[6,2],[6,1],[5,1],[4,1],[3,1],[3,2]]}
     ]
   },
-  summit: {
-    id:"summit", game:"Summit Strands", accent:"#A855F7", short:"SU",
+  topright: {
+    id:"topright", game:"Be An Influencer", location:"Himalaya", accent:"#A855F7", short:"BI",
     letters:[
       ["S","W","E","I","D","O"],
       ["M","M","O","G","I","I"],
@@ -279,8 +292,8 @@ const STALLS = {
       {text:"ISRAEL",  color:"#22C55E", path:[[1,5],[2,5],[3,5],[4,5],[5,5],[6,5]]}
     ]
   },
-  eons: {
-    id:"eons", game:"Eons Strands", accent:"#FF5A4E", short:"EO",
+  bottomleft: {
+    id:"bottomleft", game:"ScreamMeter", location:"Himalaya", accent:"#FF5A4E", short:"SM",
     letters:[
       ["C","A","N","C","E","R"],
       ["I","H","A","I","R","J"],
@@ -300,22 +313,30 @@ const STALLS = {
       {text:"PHARMA",  color:"#22D3EE", path:[[3,1],[4,1],[5,1],[6,1],[6,2],[5,2]]},
       {text:"TIME",    color:"#15803D", path:[[5,3],[6,3],[6,4],[6,5]]}
     ]
-  }
+  },
 };
-const ALL_KEYS = ["spotlight","summit","eons"];
+const HIMALAYA_KEYS = ["topleft","topright","bottomleft"];
 
-const STORE_KEY = "strands_arena_v3"; // bumped: new game keys mean old saved progress no longer maps cleanly
+
+/* =========================================================
+   STATE (persisted in localStorage on this device)
+   ========================================================= */
+const STORE_KEY = "strands_arena_v2"; // bumped: invalidates any stale progress saved before the exact-path fix
 function loadState(){
   try{
     const raw = localStorage.getItem(STORE_KEY);
     if(raw){
       const parsed = JSON.parse(raw);
       if(parsed && typeof parsed === "object" && parsed.status && parsed.foundWords && parsed.scanned){
+        // sanity-check: drop any found words that don't actually belong to that puzzle
+        // (guards against corrupted state from an older build getting carried forward)
         Object.keys(parsed.foundWords).forEach(key=>{
           const puzzle = STALLS[key];
           if(!puzzle){ delete parsed.foundWords[key]; delete parsed.status[key]; return; }
           const validTexts = puzzle.words.map(w=>w.text);
           parsed.foundWords[key] = (parsed.foundWords[key]||[]).filter(t=>validTexts.includes(t));
+          // if it was marked "solved" but doesn't actually have every word, it's stuck —
+          // unstick it so the board is playable again instead of frozen mid-way.
           if(parsed.status[key]==="solved" && parsed.foundWords[key].length !== puzzle.words.length){
             parsed.status[key] = "in_progress";
           }
@@ -324,27 +345,30 @@ function loadState(){
       }
     }
   }catch(e){}
-  return { status:{}, foundWords:{}, scanned:{}, allCelebrated:false, betaMode:false, hintsGiven:{} };
+  return { status:{}, foundWords:{}, scanned:{}, himalayaCelebrated:false, betaMode:false, hintsGiven:{} };
 }
 function saveState(){ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
 let state = loadState();
+// Beta tester mode is disabled for the live event. Forcing this to false
+// regardless of what's saved means nobody can flip it back on via an old
+// ?beta=1 link or a leftover localStorage flag — every board now only
+// unlocks the normal way, by scanning its QR code.
+state.betaMode = false;
+try{ localStorage.removeItem("strands_arena_v1"); }catch(e){} // drop the old pre-fix save, if any
 
-if(new URLSearchParams(location.search).get("beta") === "1"){
-  state.betaMode = true;
-  saveState();
-}
 function toggleBeta(){
-  state.betaMode = !state.betaMode;
-  saveState();
-  location.reload();
+  // No-op: beta tester mode is turned off for the live event.
 }
 window.toggleBeta = toggleBeta;
 
 function ensurePuzzleState(key){
-  if(!state.status[key]) state.status[key] = "new";
+  if(!state.status[key]) state.status[key] = "new"; // new | in_progress | solved | gaveup
   if(!state.foundWords[key]) state.foundWords[key] = [];
 }
 
+/* =========================================================
+   ROUTER
+   ========================================================= */
 const app = document.getElementById("app");
 
 function currentStall(){
@@ -360,6 +384,8 @@ function navigate(stallKey){
 function route(){
   const key = currentStall();
   if(key && STALLS[key]){
+    // direct visits with ?stall=... are how QR scans arrive — always allowed,
+    // and this is exactly what marks the stall as unlocked (see renderPuzzlePage).
     renderPuzzlePage(key);
   }else{
     renderLanding();
@@ -386,6 +412,9 @@ document.getElementById("overlay").addEventListener("click", (e)=>{
   if(e.target.id === "overlay") closeModal();
 });
 
+/* =========================================================
+   LANDING PAGE
+   ========================================================= */
 function renderLanding(){
   document.documentElement.style.setProperty("--accent", "#F2C94C");
   const cards = Object.values(STALLS).map(s=>{
@@ -394,7 +423,7 @@ function renderLanding(){
     const unlocked = state.betaMode || !!state.scanned[s.id];
     const badge = st==="solved" ? "✅" : st==="gaveup" ? "🏳️" : "";
     const statusLine = !unlocked
-      ? `🔒 Scan the QR to unlock`
+      ? `🔒 Scan the QR at ${s.location} to unlock`
       : (st==="solved" ? "Solved — tap to review"
          : st==="gaveup" ? "Revealed — tap to review"
          : `${s.words.length} words · tap to play`);
@@ -402,6 +431,7 @@ function renderLanding(){
     const cls = unlocked ? "stall-card" : "stall-card locked";
     return `<a class="${cls}" ${tag} style="--c:${s.accent}">
       <div class="badge">${badge}</div>
+      <div class="n">${s.location.toUpperCase()}</div>
       <div class="g">${s.game}</div>
       <div class="l">${statusLine}</div>
     </a>`;
@@ -430,10 +460,8 @@ function renderLanding(){
   });
 }
 
-/* Single combined bar for all three games — Vindhya bar removed,
-   Himalaya bar relabeled "Status Bar" and repurposed to cover everything. */
 function renderProgressStrip(){
-  const dots = ALL_KEYS.map(k=>{
+  const dots = HIMALAYA_KEYS.map(k=>{
     ensurePuzzleState(k);
     const st = state.status[k];
     const cls = st==="solved" ? "solved" : st==="gaveup" ? "gaveup" : "";
@@ -441,7 +469,7 @@ function renderProgressStrip(){
   }).join("");
   return `
     <div class="progress-strip">
-      <div class="label">Status Bar</div>
+      <div class="label">Himalaya</div>
       <div class="dots">${dots}</div>
     </div>
   `;
@@ -455,10 +483,13 @@ function resetAll(){
 }
 window.resetAll = resetAll;
 
+/* =========================================================
+   PUZZLE PAGE
+   ========================================================= */
 let dragging = false;
-let currentPath = [];
-let foundPaths = {};
-let activePuzzle = null;
+let currentPath = []; // array of [r,c]
+let foundPaths = {};  // word -> path used to find it (for drawing thread)
+let activePuzzle = null; // the puzzle currently on screen — read by the single global pointerup handler
 
 window.addEventListener("pointerup", ()=>{
   if(!dragging) return;
@@ -487,6 +518,7 @@ function renderPuzzlePage(key){
       <div class="brand">
         <div class="mark">${puzzle.short}</div>
         <div class="txt">
+          <div class="eyebrow">${puzzle.location}</div>
           <div class="title">${puzzle.game}</div>
         </div>
       </div>
@@ -615,6 +647,7 @@ function buildGrid(puzzle){
 function cellCenter(puzzle, r, c){
   const grid = document.getElementById("grid");
   const cell = grid.children[r*puzzle.letters[0].length + c];
+  const gridBox = grid.getBoundingClientRect();
   const shellBox = document.getElementById("gridShell").getBoundingClientRect();
   const box = cell.getBoundingClientRect();
   return [
@@ -699,6 +732,7 @@ function attemptSubmit(puzzle){
   renderSelectionVisual(puzzle);
 }
 
+let toastTimer = null;
 function showToast(html){
   openModal(`
     <div class="icon">✋</div>
@@ -781,7 +815,7 @@ function checkCompletion(puzzle){
 }
 
 function showSolvedModal(puzzle){
-  const allDone = ALL_KEYS.every(k=> state.status[k]==="solved" || state.status[k]==="gaveup");
+  const himalayaAllDone = HIMALAYA_KEYS.every(k=> state.status[k]==="solved" || state.status[k]==="gaveup");
   openModal(`
     <div class="icon">🎉</div>
     <h3>Board cleared!</h3>
@@ -791,14 +825,14 @@ function showSolvedModal(puzzle){
   `);
   setWaBar(true, "Reward unlocked 🎉", "Tap to claim it in the community");
 
-  if(allDone && !state.allCelebrated){
-    state.allCelebrated = true;
+  if(himalayaAllDone && !state.himalayaCelebrated){
+    state.himalayaCelebrated = true;
     saveState();
     setTimeout(()=>{
       openModal(`
-        <div class="icon">🏆</div>
-        <h3>Strands, complete.</h3>
-        <p>All three boards are done. That's the full set — one more reason to say hi in the community.</p>
+        <div class="icon">🏔️</div>
+        <h3>Himalaya, complete.</h3>
+        <p>All three Himalaya boards are done. That's the full set — one more reason to say hi in the community.</p>
         <a class="btn btn-primary" href="${WA_LINK}" target="_blank" rel="noopener" style="display:block;">Open WhatsApp community</a>
       `);
     }, 900);
