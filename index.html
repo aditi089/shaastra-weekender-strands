@@ -16,7 +16,7 @@
     --text:#F5F3EE;
     --muted:#8D8D9A;
     --whatsapp:#25D366;
-    --accent:#F2C94C; /* overridden per stall */
+    --accent:#F2C94C;
     --accent-soft: rgba(242,201,76,0.14);
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
@@ -86,7 +86,9 @@
   .hero .eyebrow{font-family:'Space Mono',monospace; color:var(--accent); font-size:12px; letter-spacing:0.16em; text-transform:uppercase;}
   .hero h1{font-size:46px; line-height:0.95; margin-top:6px;}
   .hero p{color:var(--muted); font-size:15px; line-height:1.5; margin-top:10px; max-width:40ch;}
-  .stall-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:20px;}
+
+  .stall-grid{display:grid; grid-template-columns:1fr; gap:12px; margin-top:20px;}
+
   .stall-card{
     display:block; text-decoration:none; color:inherit; cursor:pointer;
     background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:14px;
@@ -235,8 +237,8 @@
 const WA_LINK = "https://chat.whatsapp.com/JCcW4lxKSovExIKRbn7eYW";
 
 const STALLS = {
-  topleft: {
-    id:"topleft", game:"Game Show", location:"Himalaya", accent:"#F2C94C", short:"GS",
+  spotlight: {
+    id:"spotlight", game:"Spotlight Strands", accent:"#F2C94C", short:"SP",
     letters:[
       ["A","M","E","O","C","E"],
       ["L","O","C","H","O","A"],
@@ -256,8 +258,8 @@ const STALLS = {
       {text:"MEMORY",  color:"#8B5CF6", path:[[6,2],[6,1],[5,1],[4,1],[3,1],[3,2]]}
     ]
   },
-  topright: {
-    id:"topright", game:"Be An Influencer", location:"Himalaya", accent:"#A855F7", short:"BI",
+  summit: {
+    id:"summit", game:"Summit Strands", accent:"#A855F7", short:"SU",
     letters:[
       ["S","W","E","I","D","O"],
       ["M","M","O","G","I","I"],
@@ -277,8 +279,8 @@ const STALLS = {
       {text:"ISRAEL",  color:"#22C55E", path:[[1,5],[2,5],[3,5],[4,5],[5,5],[6,5]]}
     ]
   },
-  bottomleft: {
-    id:"bottomleft", game:"ScreamMeter", location:"Himalaya", accent:"#FF5A4E", short:"SM",
+  eons: {
+    id:"eons", game:"Eons Strands", accent:"#FF5A4E", short:"EO",
     letters:[
       ["C","A","N","C","E","R"],
       ["I","H","A","I","R","J"],
@@ -298,33 +300,11 @@ const STALLS = {
       {text:"PHARMA",  color:"#22D3EE", path:[[3,1],[4,1],[5,1],[6,1],[6,2],[5,2]]},
       {text:"TIME",    color:"#15803D", path:[[5,3],[6,3],[6,4],[6,5]]}
     ]
-  },
-  bottomright: {
-    id:"bottomright", game:"Vindhya Challenge", location:"Vindhya", accent:"#22D3B2", short:"VC",
-    letters:[
-      ["C","L","I","M","A","T"],
-      ["A","L","L","O","Y","E"],
-      ["I","M","I","T","S","E"],
-      ["N","I","S","P","O","C"],
-      ["G","N","S","T","R","H"],
-      ["F","T","A","K","E","O"],
-      ["L","O","O","D","S","E"]
-    ],
-    words:[
-      {text:"CLIMATE", color:"#FFCE00", path:[[0,0],[0,1],[0,2],[0,3],[0,4],[0,5],[1,5]]},
-      {text:"ALLOYS",  color:"#FF8A00", path:[[1,0],[1,1],[1,2],[1,3],[1,4],[2,4]]},
-      {text:"TIMING",  color:"#22D3EE", path:[[2,3],[2,2],[2,1],[2,0],[3,0],[4,0]]},
-      {text:"INTAKE",  color:"#F72585", path:[[3,1],[4,1],[5,1],[5,2],[5,3],[5,4]]},
-      {text:"SPORTS",  color:"#8B5CF6", path:[[3,2],[3,3],[3,4],[4,4],[4,3],[4,2]]},
-      {text:"FLOOD",   color:"#22C55E", path:[[5,0],[6,0],[6,1],[6,2],[6,3]]},
-      {text:"ECHOES",  color:"#FF3B30", path:[[2,5],[3,5],[4,5],[5,5],[6,5],[6,4]]}
-    ]
   }
 };
-const HIMALAYA_KEYS = ["topleft","topright","bottomleft"];
-const VINDHYA_KEYS = ["bottomright"];
+const ALL_KEYS = ["spotlight","summit","eons"];
 
-const STORE_KEY = "strands_arena_v2";
+const STORE_KEY = "strands_arena_v3"; // bumped: new game keys mean old saved progress no longer maps cleanly
 function loadState(){
   try{
     const raw = localStorage.getItem(STORE_KEY);
@@ -344,18 +324,15 @@ function loadState(){
       }
     }
   }catch(e){}
-  return { status:{}, foundWords:{}, scanned:{}, himalayaCelebrated:false, betaMode:false, hintsGiven:{} };
+  return { status:{}, foundWords:{}, scanned:{}, allCelebrated:false, betaMode:false, hintsGiven:{} };
 }
 function saveState(){ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
 let state = loadState();
 
-/* Beta mode: visit with ?beta=1 once to unlock every board on this device.
-   The flag then persists in localStorage until toggled off. */
 if(new URLSearchParams(location.search).get("beta") === "1"){
   state.betaMode = true;
   saveState();
 }
-
 function toggleBeta(){
   state.betaMode = !state.betaMode;
   saveState();
@@ -417,7 +394,7 @@ function renderLanding(){
     const unlocked = state.betaMode || !!state.scanned[s.id];
     const badge = st==="solved" ? "✅" : st==="gaveup" ? "🏳️" : "";
     const statusLine = !unlocked
-      ? `🔒 Scan the QR at ${s.location} to unlock`
+      ? `🔒 Scan the QR to unlock`
       : (st==="solved" ? "Solved — tap to review"
          : st==="gaveup" ? "Revealed — tap to review"
          : `${s.words.length} words · tap to play`);
@@ -425,7 +402,6 @@ function renderLanding(){
     const cls = unlocked ? "stall-card" : "stall-card locked";
     return `<a class="${cls}" ${tag} style="--c:${s.accent}">
       <div class="badge">${badge}</div>
-      <div class="n">${s.location.toUpperCase()}</div>
       <div class="g">${s.game}</div>
       <div class="l">${statusLine}</div>
     </a>`;
@@ -442,8 +418,6 @@ function renderLanding(){
     <div class="stall-grid">${cards}</div>
     <div class="footer-note">
       <button class="reset-link" onclick="resetAll()">Reset all progress</button>
-      <span class="sep">·</span>
-      <button class="reset-link" onclick="toggleBeta()">${state.betaMode ? "Turn off beta mode" : "Turn on beta mode"}</button>
     </div>
   `;
   setWaBar(true, "Join the community", "Tap for updates, drops & more games");
@@ -456,23 +430,19 @@ function renderLanding(){
   });
 }
 
+/* Single combined bar for all three games — Vindhya bar removed,
+   Himalaya bar relabeled "Status Bar" and repurposed to cover everything. */
 function renderProgressStrip(){
-  const dots = HIMALAYA_KEYS.map(k=>{
+  const dots = ALL_KEYS.map(k=>{
     ensurePuzzleState(k);
     const st = state.status[k];
     const cls = st==="solved" ? "solved" : st==="gaveup" ? "gaveup" : "";
     return `<div class="dot ${cls}"></div>`;
   }).join("");
-  ensurePuzzleState("bottomright");
-  const vSt = state.status["bottomright"];
   return `
     <div class="progress-strip">
-      <div class="label">Himalaya</div>
+      <div class="label">Status Bar</div>
       <div class="dots">${dots}</div>
-    </div>
-    <div class="progress-strip">
-      <div class="label">Vindhya</div>
-      <div class="dots"><div class="dot ${vSt==='solved'?'solved':vSt==='gaveup'?'gaveup':''}" style="flex:1"></div></div>
     </div>
   `;
 }
@@ -517,7 +487,6 @@ function renderPuzzlePage(key){
       <div class="brand">
         <div class="mark">${puzzle.short}</div>
         <div class="txt">
-          <div class="eyebrow">${puzzle.location}</div>
           <div class="title">${puzzle.game}</div>
         </div>
       </div>
@@ -812,7 +781,7 @@ function checkCompletion(puzzle){
 }
 
 function showSolvedModal(puzzle){
-  const himalayaAllDone = HIMALAYA_KEYS.every(k=> state.status[k]==="solved" || state.status[k]==="gaveup");
+  const allDone = ALL_KEYS.every(k=> state.status[k]==="solved" || state.status[k]==="gaveup");
   openModal(`
     <div class="icon">🎉</div>
     <h3>Board cleared!</h3>
@@ -822,14 +791,14 @@ function showSolvedModal(puzzle){
   `);
   setWaBar(true, "Reward unlocked 🎉", "Tap to claim it in the community");
 
-  if(himalayaAllDone && !state.himalayaCelebrated){
-    state.himalayaCelebrated = true;
+  if(allDone && !state.allCelebrated){
+    state.allCelebrated = true;
     saveState();
     setTimeout(()=>{
       openModal(`
-        <div class="icon">🏔️</div>
-        <h3>Himalaya, complete.</h3>
-        <p>All three Himalaya boards are done. That's the full set — one more reason to say hi in the community.</p>
+        <div class="icon">🏆</div>
+        <h3>Strands, complete.</h3>
+        <p>All three boards are done. That's the full set — one more reason to say hi in the community.</p>
         <a class="btn btn-primary" href="${WA_LINK}" target="_blank" rel="noopener" style="display:block;">Open WhatsApp community</a>
       `);
     }, 900);
