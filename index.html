@@ -28,7 +28,7 @@
     color:var(--text);
     font-family:'Inter',sans-serif;
     min-height:100vh;
-    padding-bottom: 84px; /* room for sticky whatsapp bar */
+    padding-bottom: 84px;
   }
   ::selection{background:var(--accent); color:#000;}
 
@@ -36,7 +36,6 @@
 
   .wrap{max-width:520px; margin:0 auto; padding:18px 16px 0;}
 
-  /* ---------- Top bar ---------- */
   .topbar{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:6px 2px 14px;}
   .brand{display:flex; align-items:center; gap:10px;}
   .brand .mark{
@@ -64,7 +63,6 @@
   }
   .btn-back:active{transform:scale(0.98);}
 
-  /* ---------- Progress strip ---------- */
   .progress-strip{
     display:flex; align-items:center; gap:8px; margin-bottom:16px;
     background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:10px 12px;
@@ -79,13 +77,11 @@
   .dot.gaveup{background:#5b5b66;}
   .dot.current{outline:2px solid var(--accent); outline-offset:1px;}
 
-  /* ---------- Card ---------- */
   .card{
     background:var(--surface); border:1px solid var(--line); border-radius:20px;
     padding:16px; margin-bottom:16px;
   }
 
-  /* ---------- Landing (stall picker) ---------- */
   .hero{padding:28px 4px 8px;}
   .hero .eyebrow{font-family:'Space Mono',monospace; color:var(--accent); font-size:12px; letter-spacing:0.16em; text-transform:uppercase;}
   .hero h1{font-size:46px; line-height:0.95; margin-top:6px;}
@@ -110,7 +106,6 @@
   .stall-card.locked .g{color:var(--muted);}
   .stall-card.locked .l{display:flex; align-items:center; gap:4px;}
 
-  /* ---------- toast ---------- */
   .toast-host{
     position:absolute; left:50%; top:-6px; transform:translate(-50%,-100%);
     z-index:5; width:calc(100% - 8px); pointer-events:none;
@@ -124,14 +119,12 @@
   .toast.show{opacity:1; transform:translateY(0);}
   .toast b{color:var(--accent);}
 
-  /* ---------- Puzzle header ---------- */
   .puzzle-head{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:2px;}
   .puzzle-head h2{font-size:28px;}
   .found-count{font-family:'Space Mono',monospace; font-size:13px; color:var(--muted);}
   .found-count b{color:var(--accent);}
   .hint-line{color:var(--muted); font-size:13px; margin:4px 0 14px;}
 
-  /* ---------- Grid ---------- */
   .grid-shell{position:relative; touch-action:none; user-select:none;}
   .grid{
     display:grid; gap:6px;
@@ -155,7 +148,6 @@
   svg.threads{position:absolute; inset:0; z-index:1; pointer-events:none; overflow:visible;}
   svg.threads path{fill:none; stroke-linecap:round; stroke-linejoin:round;}
 
-  /* ---------- word chips ---------- */
   .chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:16px;}
   .chip{
     font-family:'Space Mono',monospace; font-size:12px; padding:6px 10px; border-radius:100px;
@@ -164,7 +156,6 @@
   }
   .chip.found{color:#0B0B10; border-color:transparent; font-weight:700;}
 
-  /* ---------- action row ---------- */
   .actions{display:flex; gap:10px; margin-top:18px;}
   .btn{
     flex:1; border:none; border-radius:12px; padding:13px 14px; font-family:'Inter';
@@ -175,7 +166,6 @@
   .btn-ghost:active{background:var(--surface-2);}
   .btn-primary{background:var(--accent); color:#0B0B10;}
 
-  /* ---------- sticky whatsapp bar ---------- */
   .wa-bar{
     position:fixed; left:0; right:0; bottom:0; z-index:50;
     background:linear-gradient(180deg, rgba(11,11,16,0), var(--ink) 22%);
@@ -195,7 +185,6 @@
   .wa-inner .t .b{font-size:11.5px; opacity:0.85;}
   .wa-inner .go{margin-left:auto; font-size:20px;}
 
-  /* ---------- modal ---------- */
   .overlay{
     position:fixed; inset:0; background:rgba(6,6,9,0.72); backdrop-filter: blur(4px);
     display:flex; align-items:flex-end; justify-content:center; z-index:100;
@@ -243,9 +232,6 @@
 </div>
 
 <script>
-/* =========================================================
-   DATA — 4 verified Strands boards (7 rows x 6 cols each)
-   ========================================================= */
 const WA_LINK = "https://chat.whatsapp.com/JCcW4lxKSovExIKRbn7eYW";
 
 const STALLS = {
@@ -338,25 +324,18 @@ const STALLS = {
 const HIMALAYA_KEYS = ["topleft","topright","bottomleft"];
 const VINDHYA_KEYS = ["bottomright"];
 
-/* =========================================================
-   STATE (persisted in localStorage on this device)
-   ========================================================= */
-const STORE_KEY = "strands_arena_v2"; // bumped: invalidates any stale progress saved before the exact-path fix
+const STORE_KEY = "strands_arena_v2";
 function loadState(){
   try{
     const raw = localStorage.getItem(STORE_KEY);
     if(raw){
       const parsed = JSON.parse(raw);
       if(parsed && typeof parsed === "object" && parsed.status && parsed.foundWords && parsed.scanned){
-        // sanity-check: drop any found words that don't actually belong to that puzzle
-        // (guards against corrupted state from an older build getting carried forward)
         Object.keys(parsed.foundWords).forEach(key=>{
           const puzzle = STALLS[key];
           if(!puzzle){ delete parsed.foundWords[key]; delete parsed.status[key]; return; }
           const validTexts = puzzle.words.map(w=>w.text);
           parsed.foundWords[key] = (parsed.foundWords[key]||[]).filter(t=>validTexts.includes(t));
-          // if it was marked "solved" but doesn't actually have every word, it's stuck —
-          // unstick it so the board is playable again instead of frozen mid-way.
           if(parsed.status[key]==="solved" && parsed.foundWords[key].length !== puzzle.words.length){
             parsed.status[key] = "in_progress";
           }
@@ -369,26 +348,26 @@ function loadState(){
 }
 function saveState(){ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
 let state = loadState();
-// Beta tester mode is disabled for the live event. Forcing this to false
-// regardless of what's saved means nobody can flip it back on via an old
-// ?beta=1 link or a leftover localStorage flag — every board now only
-// unlocks the normal way, by scanning its QR code.
-state.betaMode = false;
-try{ localStorage.removeItem("strands_arena_v1"); }catch(e){} // drop the old pre-fix save, if any
+
+/* Beta mode: visit with ?beta=1 once to unlock every board on this device.
+   The flag then persists in localStorage until toggled off. */
+if(new URLSearchParams(location.search).get("beta") === "1"){
+  state.betaMode = true;
+  saveState();
+}
 
 function toggleBeta(){
-  // No-op: beta tester mode is turned off for the live event.
+  state.betaMode = !state.betaMode;
+  saveState();
+  location.reload();
 }
 window.toggleBeta = toggleBeta;
 
 function ensurePuzzleState(key){
-  if(!state.status[key]) state.status[key] = "new"; // new | in_progress | solved | gaveup
+  if(!state.status[key]) state.status[key] = "new";
   if(!state.foundWords[key]) state.foundWords[key] = [];
 }
 
-/* =========================================================
-   ROUTER
-   ========================================================= */
 const app = document.getElementById("app");
 
 function currentStall(){
@@ -404,8 +383,6 @@ function navigate(stallKey){
 function route(){
   const key = currentStall();
   if(key && STALLS[key]){
-    // direct visits with ?stall=... are how QR scans arrive — always allowed,
-    // and this is exactly what marks the stall as unlocked (see renderPuzzlePage).
     renderPuzzlePage(key);
   }else{
     renderLanding();
@@ -432,14 +409,6 @@ document.getElementById("overlay").addEventListener("click", (e)=>{
   if(e.target.id === "overlay") closeModal();
 });
 
-/* NOTE: the initial route() call lives at the very bottom of this script,
-   after every function/variable it depends on (renderPuzzlePage, foundPaths,
-   currentPath, etc.) has been declared. Calling it here would throw the
-   moment someone lands directly on a ?stall=... URL — i.e. every QR scan. */
-
-/* =========================================================
-   LANDING PAGE
-   ========================================================= */
 function renderLanding(){
   document.documentElement.style.setProperty("--accent", "#F2C94C");
   const cards = Object.values(STALLS).map(s=>{
@@ -473,6 +442,8 @@ function renderLanding(){
     <div class="stall-grid">${cards}</div>
     <div class="footer-note">
       <button class="reset-link" onclick="resetAll()">Reset all progress</button>
+      <span class="sep">·</span>
+      <button class="reset-link" onclick="toggleBeta()">${state.betaMode ? "Turn off beta mode" : "Turn on beta mode"}</button>
     </div>
   `;
   setWaBar(true, "Join the community", "Tap for updates, drops & more games");
@@ -494,7 +465,6 @@ function renderProgressStrip(){
   }).join("");
   ensurePuzzleState("bottomright");
   const vSt = state.status["bottomright"];
-  const vDone = vSt==="solved" || vSt==="gaveup";
   return `
     <div class="progress-strip">
       <div class="label">Himalaya</div>
@@ -515,18 +485,11 @@ function resetAll(){
 }
 window.resetAll = resetAll;
 
-/* =========================================================
-   PUZZLE PAGE
-   ========================================================= */
 let dragging = false;
-let currentPath = []; // array of [r,c]
-let foundPaths = {};  // word -> path used to find it (for drawing thread)
-let activePuzzle = null; // the puzzle currently on screen — read by the single global pointerup handler
+let currentPath = [];
+let foundPaths = {};
+let activePuzzle = null;
 
-// Registered ONCE. Puzzle pages get re-rendered client-side without a full page
-// reload, so a per-render window listener would stack up across every visit and
-// keep checking drags against whichever puzzle was open first. Reading
-// `activePuzzle` here instead keeps it correct no matter how you navigated in.
 window.addEventListener("pointerup", ()=>{
   if(!dragging) return;
   dragging = false;
@@ -538,7 +501,6 @@ function renderPuzzlePage(key){
   ensurePuzzleState(key);
   document.documentElement.style.setProperty("--accent", puzzle.accent);
 
-  // log the scan once
   if(!state.scanned[key]){
     state.scanned[key] = Date.now();
     if(state.status[key] === "new") state.status[key] = "in_progress";
@@ -641,16 +603,12 @@ function buildGrid(puzzle){
     if(!pt) return;
     const el = getCell(pt[0], pt[1]);
     if(el.classList.contains("found")){
-      // Every letter can only belong to ONE word. This one's already claimed —
-      // tell the player instead of silently failing, since it's usually a
-      // repeated letter (e.g. a second "S") that looks free but isn't.
       showToast(`That letter's already used in <b>${el.dataset.word}</b> — the word's right, try a different tile for it.`);
       return;
     }
     if(currentPath.length===0){ currentPath.push(pt); renderSelectionVisual(puzzle); return; }
     const last = currentPath[currentPath.length-1];
     if(sameCell(pt,last)) return;
-    // allow stepping back to previous cell to undo
     if(currentPath.length>1 && sameCell(pt, currentPath[currentPath.length-2])){
       currentPath.pop(); renderSelectionVisual(puzzle); return;
     }
@@ -682,13 +640,12 @@ function buildGrid(puzzle){
   shell.addEventListener("touchmove", (e)=>{ const t=e.touches[0]; move(t.clientX,t.clientY); }, {passive:true});
   shell.addEventListener("touchend", end);
 
-  renderThreads(puzzle); // draw any already-found words (e.g. after resize)
+  renderThreads(puzzle);
 }
 
 function cellCenter(puzzle, r, c){
   const grid = document.getElementById("grid");
   const cell = grid.children[r*puzzle.letters[0].length + c];
-  const gridBox = grid.getBoundingClientRect();
   const shellBox = document.getElementById("gridShell").getBoundingClientRect();
   const box = cell.getBoundingClientRect();
   return [
@@ -720,7 +677,6 @@ function renderThreads(puzzle){
 }
 
 function renderSelectionVisual(puzzle){
-  // reset all non-found cells
   document.querySelectorAll(".cell").forEach(cell=>{
     if(!cell.classList.contains("found")) cell.classList.remove("active");
   });
@@ -762,7 +718,6 @@ function attemptSubmit(puzzle){
     return;
   }
 
-  // Letters spell a real word, but from the wrong tiles (e.g. the wrong duplicate letter).
   if(textMatch && state.foundWords[puzzle.id].includes(textMatch.text)){
     showToast(`You've already found <b>${word}</b> ✅`);
   }else if(textMatch){
@@ -775,10 +730,7 @@ function attemptSubmit(puzzle){
   renderSelectionVisual(puzzle);
 }
 
-let toastTimer = null;
 function showToast(html){
-  // Popups, not passive toasts — every message stays up until the player
-  // closes it, and is delivered through the same modal used everywhere else.
   openModal(`
     <div class="icon">✋</div>
     <p style="margin-top:0">${html}</p>
@@ -916,8 +868,6 @@ window.addEventListener("resize", ()=>{
   if(key && STALLS[key]) renderThreads(STALLS[key]);
 });
 
-/* Entry point — deliberately last, so it runs only after every function and
-   variable above (including the puzzle-page state further up) is defined. */
 route();
 </script>
 </body>
